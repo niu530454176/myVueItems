@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+</head>
+<body>
+<div id="nonParentChild">
+	<my-component1></my-component1>
+	<my-component2></my-component2>
+</div>
+<script src="js/vue.min.js"></script>
+<script>
+	var bus = new Vue();
+
+	Vue.component('my-component1', {
+		template: '<button @click="onClick">组件1:{{num}}</button>',
+		data: function () {
+			return {
+				num: 0
+			}
+		},
+		methods: {
+			onClick: function () {
+				bus.$emit('component1Click');
+			}
+		},
+		created: function () {
+			var _this = this;
+			bus.$on('component2Change', function (val) {
+				_this.num = val;
+			})
+		}
+	});
+	Vue.component('my-component2', {
+		template: '组件2:<input type="text" :value="num" @keyup="onKeyup($event.target.value)" />',
+		data: function () {
+			return {
+				num: 0
+			}
+		},
+		created: function () {
+			var _this = this;
+			bus.$on('component1Click', function () {
+				_this.num++;
+			})
+		},
+		methods: {
+			onKeyup: function (val) {
+				bus.$emit('component2Change', val);
+			}
+		}
+	});
+	new Vue({
+		el: '#nonParentChild'
+	})
+</script>
+</body>
+</html>

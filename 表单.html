@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+	<style>
+		.done span {
+			text-decoration: line-through;
+		}
+	</style>
+</head>
+<body>
+<div id="todolist">
+	<div class="top">
+		<input type="text" v-model="inputTxt" @keyup.enter="addOne"/>
+		<button @click="addOne">添加</button>
+	</div>
+	<ul>
+		<li v-for="(item, index) in list" :class="{done: item.isDone}">
+			<span @click="toggleIsDone(index)">{{item.name}}</span>
+			<button @click="list.splice(index, 1)">删除</button>
+		</li>
+	</ul>
+	<div>当前共有{{list.length}}项 未完成{{todoNum}}项 已完成{{doneNum}}项</div>
+	<button @click="list.splice(0)">清空列表</button>
+</div>
+<script src="js/vue.min.js"></script>
+<script>
+	var vm = new Vue({
+		el: '#todolist',
+		data: {
+			inputTxt: '',
+			list: [],
+		},
+		methods: {
+			addOne: function () {
+				var _this = this;
+				if (_this.inputTxt.length) {
+					_this.list.push({
+						name: this.inputTxt,
+						isDone: false
+					});
+				}
+				_this.inputTxt = '';
+			},
+			toggleIsDone: function (index) {
+				var _this = this;
+				_this.list[index].isDone = !_this.list[index].isDone;
+				this.save();
+			},
+			save: function () {
+				var jsonStr = JSON.stringify(this.list);
+				localStorage.todoList = jsonStr;
+			}
+		},
+		computed: {
+			todoNum: function () {
+				console.log(this.list);
+				return this.list.filter(function (item) {
+					return !item.isDone;
+				}).length;
+			},
+			doneNum: function () {
+				return this.list.filter(function (item) {
+					return item.isDone;
+				}).length;
+			}
+		},
+		created: function () {
+			this.list = localStorage.todoList ? JSON.parse(localStorage.todoList) : [];
+			console.log(this.list);
+		},
+		watch: {
+			list: function () {
+				this.save();
+			}
+		}
+	});
+</script>
+</body>
+</html>
